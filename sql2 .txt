@@ -1,0 +1,108 @@
+1) Combien la base de données contient-elle de sociétés offshores différentes dont la source est "Panama Papers" ? 
+
+- SELECT COUNT(DISTINCT(name)) FROM entity WHERE source = "Panama Papers"
+
+2) Quel intermédiaire a créé le plus de sociétés offshores ? A-t-on son adresse et son pays ?
+SELECT 
+	i.name, 
+    count(i.name) as occurence,
+    s.address,
+    c.country
+From 
+	entity e, 
+    intermediary i,
+    assoc_inter_entity a,
+    address s,
+    country c
+WHERE 
+	i.id = a.inter 
+    AND e.id = a.entity
+    and i.id_address = s.id_address
+    AND c.code = s.countries
+GROUP BY i.name 
+ORDER BY occurence
+DESC LIMIT 1
+
+3) Combien la base contient-elle de bénéficiaires avec un nom unique ? 
+
+- SELECT
+	count(DISTINCT(o.name))
+From 
+	entity e,
+    officer o,
+    assoc_officer_entity a
+WHERE
+	e.id = a.entity
+    and o.id = a.officer
+    and assoc_type LIKE 'benef%'
+
+3') Quel est le bénéficiaire dont le nom revient le plus souvent ? 
+
+SELECT
+	o.name,
+    count(o.name) as result
+From 
+	entity e,
+    officer o,
+    assoc_officer_entity a
+WHERE
+	e.id = a.entity
+    and o.id = a.officer
+GROUP BY 
+	o.name
+ORDER BY
+	result DESC
+LIMIT 1
+
+4) Donner la liste des juridictions avec le nombre d'entreprises offshores enregistrées sur chaque territoire, triée par ordre décroissant.
+
+- select 
+	jurisdiction_description,
+    count(jurisdiction_description) As occurence
+FROM 
+	entity
+GROUP BY
+	jurisdiction_description
+order BY occurence DESC
+
+5) Regrouper les sociétés offshores par statut, et trier la liste par ordre décroissant.
+
+- select 
+	name,
+    status
+FROM 
+	entity
+GROUP BY
+	name
+order BY status DESC
+
+6) Trouver la liste des bénéficiaires dont le nom contient "BNP" et ajouter, pour chaque bénéficiaire, le nom des sociétés offshores.
+
+- SELECT
+	e.name,
+    o.name,
+    a.assoc_type
+FROM
+	officer o,
+	entity e,
+    assoc_officer_entity a
+WHERE
+	o.id = a.officer
+    and e.id = a.entity
+    and o.name LIKE '%BNP%'
+
+7) Trouver la liste des sociétés dont la juridiction est "France", "Monaco" ou "Réunion".
+
+-SELECT
+	name,
+	jurisdiction_description
+FROM
+	entity
+WHERE
+	jurisdiction_description = 'France'
+    or jurisdiction_description = 'Monaco'
+    or jurisdiction_description = 'Réunion'
+
+8) Trouver la liste des sociétés dont le pays de l'adresse et le pays de la juridiction sont différents.
+
+-
